@@ -1,0 +1,81 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: sonarqube
+spec:
+  releaseName: sonarqube
+  chart:
+    spec:
+      chart: sonarqube
+      sourceRef:
+        kind: HelmRepository
+        name: sonarqube
+        namespace: flux-system
+      version: 9.6.4
+  interval: 1h0m0s
+  install:
+    remediation:
+      retries: 3
+  # Default values
+  # https://github.com/SonarSource/helm-chart-sonarqube/blob/master/charts/sonarqube/values.yaml
+  values:
+    image:
+      repository: sonarqube
+      tag: 8.2-community
+    persistence:
+      mounts:
+        - mountPath: /opt/sonarqube/extensions/plugins
+          name: sonarqube
+          subPath: extensions/plugins
+    plugins:
+      install:
+        - "https://github.com/cnescatlab/sonar-cnes-report/releases/download/3.3.1/sonar-cnes-report-3.3.1.jar"
+          # Open Source Report Plugin for Sonar
+        - "https://github.com/SonarSource/sonar-go/releases/download/1.1.1.2000/sonar-go-plugin-1.1.1.2000.jar"
+          # SonarGo plugin for scanning
+        - "https://repo1.maven.org/maven2/org/sonarsource/scm/git/sonar-scm-git-plugin/1.12.1.2064/sonar-scm-git-plugin-1.12.1.2064.jar"
+          # Sonar GIT SCM plugin
+        - "https://repo1.maven.org/maven2/org/sonarsource/javascript/sonar-javascript-plugin/8.2.0.16042/sonar-javascript-plugin-8.2.0.16042.jar"
+          # Sonar JS Plugin
+        - "https://repo1.maven.org/maven2/org/sonarsource/python/sonar-python-plugin/3.6.0.8488/sonar-python-plugin-3.6.0.8488.jar"
+          # Sonar Python Plugin
+    service:
+      type: NodePort
+    ingress:
+      enabled: true
+      # Used to create an Ingress record.
+      hosts:
+        - name: sonarqube.qa.devopsidiot.com
+          # Different clouds or configurations might need /* as the default path
+          path: /*
+          # For additional control over serviceName and servicePort
+          # serviceName: someService
+          # servicePort: somePort
+      annotations:
+        kubernetes.io/ingress.class: alb
+        alb.ingress.kubernetes.io/scheme: internal
+        alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-Ext-2018-06
+        alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":9000}]'
+        alb.ingress.kubernetes.io/backend-protocol: HTTP     
+
+    # Affinity for pod assignment
+    # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity: {}
+    
+    # Tolerations for pod assignment
+    # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    # taint a node with the following command to mark it as not schedulable for new pods
+    # kubectl taint nodes <node> sonarqube=true:NoSchedule
+    # The following statement will tolerate this taint and as such reverse a node for sonarqube
+    tolerations: []
+    #  - key: "sonarqube"
+    #    operator: "Equal"
+    #    value: "true"
+    #    effect: "NoSchedule"
+    
+    # Node labels for pod assignment
+    # Ref: https://kubernetes.io/docs/user-guide/node-selection/
+    # add a label to a node with the following command
+    # kubectl label node <node> sonarqube=true
+    nodeSelector: {}
+    #  sonarqube: "true"

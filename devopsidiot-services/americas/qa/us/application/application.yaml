@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: application
+  namespace: argo
+spec:
+  destination:
+    namespace: devopsidiot
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/devopsidiot/helm-omaze-deployment
+    # targetRevision: v1.5.0
+    path: .
+    helm:
+      parameters:
+      - name: ingress.enabled
+        value: "true"
+      - name: ingress.acl.enabled
+        value: "false"
+      - name: ingress.externalALB
+        value: "true"
+      - name: image.name
+        value: 123456789101.dkr.ecr.us-east-1.amazonaws.com/application # {"$imagepolicy": "flux-system:cl-crm-api-us-qa:name"}
+      - name: image.tag
+        value: v1.3.0-rc.1-1668721912 # {"$imagepolicy": "flux-system:application-us-qa:tag"}
+      - name: applicationVariables.namedSecret
+        value: "true"
+      - name: applicationVariables.namedConfigMap
+        value: "true"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

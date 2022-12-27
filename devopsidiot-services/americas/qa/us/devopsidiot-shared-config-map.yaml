@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: devopsidiot-shared-config-map
+  namespace: devopsidiot
+data:
+  ENV: qa
+  #shared db port
+  PG_PORT: "5432"
+  #shared redis port
+  REDIS_PORT: "6379"

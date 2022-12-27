@@ -1,0 +1,12 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: actions-runner-controller
+spec:
+   values:
+      ingress:
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: "gh-webhook.qa.devopsidiot.com"
+          alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:123456789101:certificate/53926e22-a2f8-4c7e-b2d6-33ee9582df28
+        hosts:
+          - host: gh-webhook.qa.devopsidiot.com

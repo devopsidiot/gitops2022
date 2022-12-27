@@ -1,0 +1,20 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: newrelic
+  namespace: newrelic
+spec:
+  chart:
+    spec:
+      version: 3.4.0
+  valuesFrom:
+    - kind: Secret
+      name: newrelic-license
+      valuesKey: ingest-key
+      targetPath: global.licenseKey
+  values:
+    global:
+      cluster: omaze-eks
+    newrelic-logging:
+      fluentBit:
+        criEnabled: true

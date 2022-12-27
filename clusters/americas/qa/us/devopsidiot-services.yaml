@@ -1,0 +1,111 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: devopsidiot-services
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  dependsOn:
+    - name: sources
+    - name: controllers
+    - name: cicd
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./devopsidiot-services/americas/qa/us
+  prune: true
+  validation: client
+  decryption:
+    provider: sops
+  # This patch sets a patch in any yaml file in devopsidiot-services/qa
+  # It sets a patch on the templated imagepolicy.yaml
+  # it filters the tags in ecr to get timestamps, and chooses the
+  # latest timestamp.
+  # This means that we need to append timestamps to any image sent
+  # to QA, as evidenced in kon-nichiwa-service.
+  patches:
+    - patch: |-
+        - op: add
+          path: /spec/source/helm/parameters/0
+          value: 
+            name: accountNumber
+            value: "123456789101"
+        - op: add
+          path: /spec/source/helm/parameters/0
+          value:
+            name: awsRegion
+            value: "us-east-1"
+        - op: add
+          path: /spec/source/helm/parameters/0
+          value:
+            name: domainName
+            value: "qa.devopsidiot.com"
+        - op: add
+          path: /spec/source/helm/parameters/0
+          value:
+            name: businessRegion
+            value: "americas"
+        - op: add
+          path: /spec/source/helm/parameters/0
+          value:
+            name: environment
+            value: "qa"
+        - op: add
+          path: /spec/source/helm/parameters/0
+          value:
+            name: territory
+            value: "us"
+        - op: add
+          path: /spec/source/helm/parameters/0
+          value:
+            name: vpnRegionalWhiteListACL
+            value: "OfficeVPN-Web-ACL-v2/"
+        - op: add
+          path: /spec/source/helm/parameters/0
+          value:
+            name: publicBotControlACL
+            value: "PublicBotControl/"
+        - op: add
+          path: /spec/source/helm/parameters/0
+          value:
+            name: repoBranch
+            value: "integration"
+        - op: add
+          path: /spec/source/helm/parameters/0
+          value:
+            name: ecrSecret
+            value: "ecr-credentials"
+        - op: add
+          path: /spec/source/helm/parameters/0
+          value:
+            name: filterTags.enabled
+            value: "true"
+        - op: add
+          path: /spec/source/helm/parameters/0
+          value:
+            name: filterTags.pattern
+            value: '^[a-zA-Z0-9\-._]+-(?P<ts>[1-9][0-9]*)'
+        - op: add
+          path: /spec/source/helm/parameters/0
+          value:
+            name: filterTags.extractTimestamps
+            value: "true"
+        - op: add
+          path: /spec/source/helm/parameters/0
+          value:
+            name: imagePolicy.semver
+            value: "false"
+        - op: add
+          path: /spec/source/helm/parameters/0
+          value:
+            name: applicationVariables.sharedConfigMapName
+            value: "devopsidiot-shared-config-map"
+        - op: add
+          path: /spec/source/helm/parameters/0
+          value:
+            name: applicationVariables.sharedSecretName
+            value: "devopsidiot-shared-secret"
+      target:
+        kind: Application
+        group: argoproj.io
+        version: v1alpha1

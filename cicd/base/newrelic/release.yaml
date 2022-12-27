@@ -1,0 +1,37 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: newrelic
+  namespace: newrelic
+spec:
+  releaseName: newrelic
+  chart:
+    spec:
+      chart: nri-bundle
+      sourceRef:
+        kind: HelmRepository
+        name: newrelic
+        namespace: flux-system
+      version: 2.22.3
+  interval: 5m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  # Default values
+  # https://github.com/newrelic/helm-charts/blob/master/charts/nri-bundle/values.yaml
+  values:
+    prometheus:
+      enabled: false
+    webhook:
+      enabled: true
+    infrastructure:
+      enabled: true
+    ksm:
+      enabled: true
+    kubeEvents:
+      enabled: true
+    logging:
+      enabled: true

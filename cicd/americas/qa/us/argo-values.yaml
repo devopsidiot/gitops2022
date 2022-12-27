@@ -1,0 +1,15 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: argo
+  namespace: argo
+spec:
+  values:
+    server:
+      config:
+        url: "https://argo.qa.devopsidiot.com"
+      ingress:
+        annotations:
+          alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:123456789101:certificate/53926e22-a2f8-4c7e-b2d6-33ee9582df28
+        hosts:
+          - argo.qa.devopsidiot.com

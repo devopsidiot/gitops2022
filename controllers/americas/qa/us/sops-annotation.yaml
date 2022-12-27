@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kustomize-controller
+  namespace: flux-system
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789101:role/sops-oidc-role
